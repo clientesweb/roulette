@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rueda de la Fortuna</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="wheel-container">
+            <div class="wheel" id="wheel">
+                <div class="section" style="--i:0;">Premio 1</div>
+                <div class="section" style="--i:1;">Premio 2</div>
+                <div class="section" style="--i:2;">Premio 3</div>
+                <div class="section" style="--i:3;">Premio 4</div>
+                <div class="section" style="--i:4;">Premio 5</div>
+                <div class="section" style="--i:5;">Premio 6</div>
+            </div>
+        </div>
+        <button id="spin-button">Girar</button>
+        <div id="result"></div>
+        <div id="payment-form" style="display: none;">
+            <h2>Completa tu pago</h2>
+            <form id="payment-form">
+                <div id="card-element"></div>
+                <button id="submit">Pagar</button>
+                <div id="payment-result"></div>
+            </form>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
