@@ -1,70 +1,300 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
+:root {
+    --primary-color: #3b82f6;
+    --secondary-color: #1f2937;
+    --accent-color: #f59e0b;
+    --text-color: #374151;
+    --background-color: #f3f4f6;
 }
 
-.container {
-    width: 80%;
-    margin: 40px auto;
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    color: var(--text-color);
+    background-color: var(--background-color);
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+header {
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.header-content {
+    display: flex;
+    justify-content: center;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.logo {
+    max-width: 100%;
+    height: auto;
+    transition: transform 0.3s ease;
+}
+
+.logo:hover {
+    transform: scale(1.05);
+}
+
+main {
+    flex-grow: 1;
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.game-container {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    max-width: 28rem;
+    margin: 0 auto;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.game-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+h1, h2 {
+    color: var(--secondary-color);
     text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+h1 {
+    font-size: 2.25rem;
+    font-weight: 700;
+}
+
+h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
 }
 
 .wheel-container {
-    width: 300px;
-    height: 300px;
-    margin: 20px auto;
-    border-radius: 50%;
-    overflow: hidden;
     position: relative;
+    width: 16rem;
+    height: 16rem;
+    margin: 0 auto;
 }
 
 .wheel {
     width: 100%;
     height: 100%;
-    border-radius: 50%;
-    position: relative;
-    transition: transform 4s cubic-bezier(0.33, 1, 0.68, 1);
+    transition: transform 5s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
-.section {
+.wheel-pointer {
     position: absolute;
-    width: 50%;
-    height: 50%;
-    background-color: #ffcc00;
-    border: 2px solid #fff;
-    transform-origin: 100% 100%;
-    clip-path: polygon(100% 0, 0 0, 0 100%);
-    transform: rotate(calc(var(--i) * 60deg));
+    top: -10px;
+    left: 50%;
+    width: 20px;
+    height: 40px;
+    background-color: var(--accent-color);
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    transform: translateX(-50%);
+    z-index: 10;
+}
+
+.button {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background-color 0.3s, transform 0.3s;
+    display: block;
+    margin: 1rem auto;
+    text-align: center;
+}
+
+.button:hover {
+    background-color: #2563eb;
+    transform: translateY(-2px);
+}
+
+.button:disabled {
+    background-color: #9ca3af;
+    cursor: not-allowed;
+}
+
+.ad-banner {
+    overflow: hidden;
+    margin-top: 2rem;
+    background-color: white;
+    padding: 1rem 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.ad-container {
+    display: flex;
+    animation: scroll 30s linear infinite;
+}
+
+@keyframes scroll {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
+.ad-image {
+    width: 300px;
+    height: 100px;
+    margin-right: 1rem;
+    transition: transform 0.3s ease;
+}
+
+.ad-image:hover {
+    transform: scale(1.05);
+}
+
+.brand-logos {
+    margin-top: 2rem;
+    text-align: center;
+    background-color: white;
+    padding: 2rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.logo-container {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.logo-container img {
+    transition: transform 0.3s ease;
+}
+
+.logo-container img:hover {
+    transform: scale(1.1);
+}
+
+footer {
+    background-color: var(--secondary-color);
+    color: white;
+    padding: 1rem;
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.whatsapp-button {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    background-color: #25d366;
+    color: white;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
-    font-weight: bold;
-    color: #333;
+    text-decoration: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s, transform 0.3s;
 }
 
-#spin-button {
-    width: 100px;
-    height: 40px;
-    background-color: #4CAF50;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-top: 20px;
+.whatsapp-button:hover {
+    background-color: #128c7e;
+    transform: scale(1.1);
 }
 
-#result {
-    font-size: 24px;
-    font-weight: bold;
-    color: #333;
-    margin-top: 20px;
+@media (max-width: 768px) {
+    main {
+        padding: 1rem;
+    }
+
+    .game-container {
+        padding: 1.5rem;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    .wheel-container {
+        width: 14rem;
+        height: 14rem;
+    }
+
+    .ad-banner {
+        display: none;
+    }
+
+    .brand-logos {
+        padding: 1rem;
+    }
+
+    .logo-container {
+        gap: 0.5rem;
+    }
+
+    .logo-container img {
+        width: 80px;
+        height: auto;
+    }
 }
 
-#payment-form {
-    margin-top: 20px;
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: #fff;
+@media (max-width: 480px) {
+    .game-container {
+        padding: 1rem;
+    }
+
+    h1 {
+        font-size: 1.75rem;
+    }
+
+    .wheel-container {
+        width: 12rem;
+        height: 12rem;
+    }
+
+    .button {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-out;
+}
+
+.slide-in {
+    animation: slideIn 0.5s ease-out;
 }
