@@ -4,7 +4,7 @@ const WHEEL_SECTORS = [
     { label: '$50', type: 'cash', color: '#45B7D1', weight: 8 },
     { label: 'Sigue participando', type: 'no-cash', color: '#F7DC6F', weight: 40 },
     { label: '$100', type: 'cash', color: '#B8E986', weight: 4 },
-    { label: 'Sigue participando', type:  'no-cash', color: '#FF8C42', weight: 50 },
+    { label: 'Sigue participando', type: 'no-cash', color: '#FF8C42', weight: 50 },
     { label: '$500', type: 'cash', color: '#98DDCA', weight: 1 },
     { label: 'Sigue participando', type: 'no-cash', color: '#D198C5', weight: 70 },
 ];
@@ -14,21 +14,28 @@ let participationType = 'VIEWS';
 let winner = null;
 let cashWon = null;
 let wheelCanvas, wheelCtx;
+let userProfile = null;
+let stripe;
 
 const backendSimulation = {
     users: [],
     payments: [],
+    gameHistory: [],
 
     registerUser: function(userData) {
         const userId = Date.now().toString();
-        this.users.push({ ...userData, id: userId });
+        this.users.push({ ...userData, id: userId, level: 1, achievements: [] });
         return userId;
     },
 
     processPayment: function(userId, amount) {
-        const paymentId = Date.now().toString();
-        this.payments.push({ userId, amount, id: paymentId, status: 'completed' });
-        return { success: true, paymentId };
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                const paymentId = Date.now().toString();
+                this.payments.push({ userId, amount, id: paymentId, status: 'completed' });
+                resolve({ success: true, paymentId });
+            }, 1000);
+        });
     },
 
     getUserData: function(userId) {
@@ -38,6 +45,28 @@ const backendSimulation = {
     getPaymentStatus: function(paymentId) {
         const payment = this.payments.find(p => p.id === paymentId);
         return payment ? payment.status : 'not found';
+    },
+
+    addGameToHistory: function(userId, result) {
+        this.gameHistory.push({ userId, result, timestamp: new Date() });
+    },
+
+    getUserGameHistory: function(userId) {
+        return this.gameHistory.filter(game => game.userId === userId);
+    },
+
+    updateUserLevel: function(userId) {
+        const user = this.getUserData(userId);
+        if (user) {
+            user.level += 1;
+            // Check for achievements
+            if (user.level === 5) {
+                user.achievements.push('Jugador Frecuente');
+            }
+            if (user.level === 10) {
+                user.achievements.push('Maestro del Juego');
+            }
+        }
     }
 };
 
@@ -113,67 +142,20 @@ function renderGameContent() {
                 <h2 class="slide-in">${cashWon ? `¡Felicidades! Ganaste ${cashWon}` : 'Pago para jugar'}</h2>
                 <p class="slide-in">${cashWon ? 'Completa el formulario para recibir tu pago:' : 'Completa el formulario para realizar el pago de $1.29:'}</p>
                 <form id="paymentForm" class="slide-in">
-                    <div class="form-group">
-                        <label for="name">Nombre completo</label>
-                        <input type="text" id="name" required>
-                        <span class="error-message" id="nameError"></span>
-                    </div>
-                    <div class="form-group">
-                        <label for="email">Correo electrónico</label>
-                        <input type="email" id="email" required>
-                        <span class="error-message" id="emailError"></span>
-                    </div>
-                    <div class="form-group">
-                        <label for="phone">Teléfono</label>
-                        <input type="tel" id="phone" required>
-                        <span class="error-message" id="phoneError"></span>
-                    </div>
-                    <button type="submit" class="button">Enviar</button>
+                    <div id="card-element"></div>
+                    <div id="card-errors" role="alert"></div>
+                    <button type="submit" class="button">Pagar</button>
                 </form>
             `;
-            document.getElementById('paymentForm').addEventListener('submit', handleFormSubmit);
+            setupStripeElements();
+            document.getElementById('paymentForm').addEventListener('submit', handlePaymentSubmit);
             break;
     }
 }
 
 function drawWheel(rotation = 0) {
-    const centerX = wheelCanvas.width / 2;
-    const centerY = wheelCanvas.height / 2;
-    const radius = wheelCanvas.width / 2 - 10;
-
-    wheelCtx.clearRect(0, 0, wheelCanvas.width, wheelCanvas.height);
-    wheelCtx.save();
-    wheelCtx.translate(centerX, centerY);
-    wheelCtx.rotate(rotation);
-    wheelCtx.translate(-centerX, -centerY);
-
-    let totalWeight = WHEEL_SECTORS.reduce((sum, sector) => sum + sector.weight, 0);
-    let currentAngle = 0;
-
-    for (let i = 0; i < WHEEL_SECTORS.length; i++) {
-        const sector = WHEEL_SECTORS[i];
-        const angle = (sector.weight / totalWeight) * Math.PI * 2;
-
-        wheelCtx.beginPath();
-        wheelCtx.moveTo(centerX, centerY);
-        wheelCtx.arc(centerX, centerY, radius, currentAngle, currentAngle + angle);
-        wheelCtx.lineTo(centerX, centerY);
-        wheelCtx.fillStyle = sector.color;
-        wheelCtx.fill();
-
-        wheelCtx.save();
-        wheelCtx.translate(centerX, centerY);
-        wheelCtx.rotate(currentAngle + angle / 2);
-        wheelCtx.textAlign = 'right';
-        wheelCtx.fillStyle = '#fff';
-        wheelCtx.font = 'bold 16px Arial';
-        wheelCtx.fillText(sector.label, radius - 10, 5);
-        wheelCtx.restore();
-
-        currentAngle += angle;
-    }
-
-    wheelCtx.restore();
+    // Esta función ahora está vacía para que puedas implementar tu propio diseño de ruleta
+    // Puedes usar el parámetro 'rotation' para aplicar la rotación a tu diseño
 }
 
 function spinWheel() {
@@ -226,56 +208,51 @@ function finishSpin(totalRotation) {
     } else {
         gameState = 'RESULT';
     }
+    
+    if (userProfile) {
+        backendSimulation.addGameToHistory(userProfile.id, result);
+        backendSimulation.updateUserLevel(userProfile.id);
+    }
+    
     renderGameContent();
 }
 
-function handleFormSubmit(e) {
+function setupStripeElements() {
+    stripe = Stripe('your_publishable_key');
+    const elements = stripe.elements();
+    const cardElement = elements.create('card');
+    cardElement.mount('#card-element');
+
+    cardElement.on('change', function(event) {
+        const displayError = document.getElementById('card-errors');
+        if (event.error) {
+            displayError.textContent = event.error.message;
+        } else {
+            displayError.textContent = '';
+        }
+    });
+}
+
+async function handlePaymentSubmit(e) {
     e.preventDefault();
     
-    const name = document.getElementById('name').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const phone = document.getElementById('phone').value.trim();
+    const { token, error } = await stripe.createToken('#card-element');
 
-    let isValid = true;
-
-    if (name.length < 3) {
-        document.getElementById('nameError').textContent = 'El nombre debe tener al menos 3 caracteres';
-        isValid = false;
+    if (error) {
+        const errorElement = document.getElementById('card-errors');
+        errorElement.textContent = error.message;
     } else {
-        document.getElementById('nameError').textContent = '';
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        document.getElementById('emailError').textContent = 'Ingrese un correo electrónico válido';
-        isValid = false;
-    } else {
-        document.getElementById('emailError').textContent = '';
-    }
-
-    if (!/^\d{10}$/.test(phone)) {
-        document.getElementById('phoneError').textContent = 'Ingrese un número de teléfono válido (10 dígitos)';
-        isValid = false;
-    } else {
-        document.getElementById('phoneError').textContent = '';
-    }
-
-    if (isValid) {
-        const userId = backendSimulation.registerUser({ name, email, phone });
-        localStorage.setItem('userId', userId);
-
-        if (participationType === 'DIRECT_PAYMENT') {
-            const paymentResult = backendSimulation.processPayment(userId, 1.29);
-            if (paymentResult.success) {
+        try {
+            const result = await backendSimulation.processPayment(userProfile.id, 1.29);
+            if (result.success) {
                 showMessage('Pago procesado correctamente. ¡A jugar!', 'success');
                 gameState = 'WHEEL';
                 renderGameContent();
             } else {
                 showMessage('Error en el pago. Por favor, intenta de nuevo.', 'error');
             }
-        } else {
-            showMessage('¡Formulario enviado! Recibirás tu pago pronto.', 'success');
-            gameState = 'START';
-            renderGameContent();
+        } catch (error) {
+            showMessage('Error en el pago. Por favor, intenta de nuevo.', 'error');
         }
     }
 }
@@ -312,9 +289,81 @@ function setupLogoSlider() {
     }, 3000);
 }
 
+function setupAccessibilityControls() {
+    const increaseFont = document.getElementById('increaseFont');
+    const decreaseFont = document.getElementById('decreaseFont');
+    const toggleContrast = document.getElementById('toggleContrast');
+
+    increaseFont.addEventListener('click', () => {
+        document.body.style.fontSize = `${parseFloat(getComputedStyle(document.body).fontSize) * 1.1}px`;
+    });
+
+    decreaseFont.addEventListener('click', () => {
+        document.body.style.fontSize = `${parseFloat(getComputedStyle(document.body).fontSize) * 0.9}px`;
+    });
+
+    toggleContrast.addEventListener('click', () => {
+        document.body.classList.toggle('high-contrast');
+    });
+}
+
+function setupAnalytics() {
+    // Ejemplo de evento de análisis
+    function logGamePlay() {
+        gtag('event', 'game_play', {
+            'event_category': 'engagement',
+            'event_label': participationType
+        });
+    }
+
+    // Añadir el registro de eventos en los lugares apropiados
+    document.getElementById('spinButton').addEventListener('click', logGamePlay);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('currentYear').textContent = new Date().getFullYear();
     renderGameContent();
     setupAdSlider();
     setupLogoSlider();
+    setupAccessibilityControls();
+    setupAnalytics();
+
+    // Simular inicio de sesión del usuario
+    userProfile = backendSimulation.registerUser({
+        name: 'Usuario de Prueba',
+        email: 'usuario@ejemplo.com',
+        phone: '1234567890'
+    });
+
+    document.getElementById('profileLink').addEventListener('click', (e) => {
+        e.preventDefault();
+        showUserProfile();
+    });
 });
+
+function showUserProfile() {
+    const user = backendSimulation.getUserData(userProfile.id);
+    const gameHistory = backendSimulation.getUserGameHistory(userProfile.id);
+
+    const gameContent = document.getElementById('gameContent');
+    gameContent.innerHTML = `
+        <h2>Perfil de Usuario</h2>
+        <p>Nombre: ${user.name}</p>
+        <p>Email: ${user.email}</p>
+        <p>Nivel: ${user.level}</p>
+        <h3>Logros:</h3>
+        <ul>
+            ${user.achievements.map(achievement => `<li>${achievement}</li>`).join('')}
+        </ul>
+        <h3>Historial de Juegos:</h3>
+        <ul>
+            ${gameHistory.map(game => `<li>${game.result.label} - ${game.timestamp.toLocaleString()}</li>`).join('')}
+        </ul>
+        <button id="backToGame" class="button">Volver al Juego</button>
+    `;
+
+    document.getElementById('backToGame').addEventListener('click', () => {
+        gameState = 'START';
+        renderGameContent();
+    });
+}
