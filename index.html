@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gana Cash</title>
+    <title>Gana Cash - Juega y Gana</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
@@ -11,32 +11,51 @@
     <header>
         <div class="header-content">
             <img src="/placeholder.svg?height=60&width=200" alt="Gana Cash Logo" width="200" height="60" class="logo">
+            <nav>
+                <ul>
+                    <li><a href="#game">Jugar</a></li>
+                    <li><a href="#sponsors">Patrocinadores</a></li>
+                    <li><a href="#contact">Contacto</a></li>
+                </ul>
+            </nav>
         </div>
     </header>
 
     <main>
-        <div class="game-container">
-            <h1>Gana Cash</h1>
-            <div id="gameContent"></div>
-        </div>
-
-        <div class="ad-banner">
-            <div class="ad-container" id="adContainer">
-                <img src="/placeholder.svg?height=100&width=300" alt="Anuncio 1" class="ad-image">
-                <img src="/placeholder.svg?height=100&width=300" alt="Anuncio 2" class="ad-image">
-                <img src="/placeholder.svg?height=100&width=300" alt="Anuncio 3" class="ad-image">
+        <section id="game" class="game-section">
+            <div class="game-container">
+                <h1>Gana Cash</h1>
+                <div id="gameContent"></div>
             </div>
-        </div>
+        </section>
 
-        <div class="brand-logos">
-            <h2>Nuestros Patrocinadores</h2>
-            <div class="logo-slider" id="logoSlider">
-                <img src="/placeholder.svg?height=50&width=100" alt="Marca 1" width="100" height="50">
-                <img src="/placeholder.svg?height=50&width=100" alt="Marca 2" width="100" height="50">
-                <img src="/placeholder.svg?height=50&width=100" alt="Marca 3" width="100" height="50">
-                <img src="/placeholder.svg?height=50&width=100" alt="Marca 4" width="100" height="50">
+        <section id="ads" class="ad-section">
+            <div class="ad-banner">
+                <div class="ad-container" id="adContainer">
+                    <img src="/placeholder.svg?height=100&width=300" alt="Anuncio 1" class="ad-image">
+                    <img src="/placeholder.svg?height=100&width=300" alt="Anuncio 2" class="ad-image">
+                    <img src="/placeholder.svg?height=100&width=300" alt="Anuncio 3" class="ad-image">
+                </div>
             </div>
-        </div>
+        </section>
+
+        <section id="sponsors" class="sponsors-section">
+            <div class="brand-logos">
+                <h2>Nuestros Patrocinadores</h2>
+                <div class="logo-slider" id="logoSlider">
+                    <img src="/placeholder.svg?height=50&width=100" alt="Marca 1" width="100" height="50">
+                    <img src="/placeholder.svg?height=50&width=100" alt="Marca 2" width="100" height="50">
+                    <img src="/placeholder.svg?height=50&width=100" alt="Marca 3" width="100" height="50">
+                    <img src="/placeholder.svg?height=50&width=100" alt="Marca 4" width="100" height="50">
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="contact-section">
+            <h2>Contacto</h2>
+            <p>¿Tienes alguna pregunta? Contáctanos:</p>
+            <a href="mailto:info@ganacash.com" class="contact-button">Enviar correo</a>
+        </section>
     </main>
 
     <footer>
