@@ -3,32 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rueda de la Fortuna</title>
+    <title>Gana Cash</title>
     <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <div class="wheel-container">
-            <div class="wheel" id="wheel">
-                <div class="section" style="--i:0;">Premio 1</div>
-                <div class="section" style="--i:1;">Premio 2</div>
-                <div class="section" style="--i:2;">Premio 3</div>
-                <div class="section" style="--i:3;">Premio 4</div>
-                <div class="section" style="--i:4;">Premio 5</div>
-                <div class="section" style="--i:5;">Premio 6</div>
+    <header>
+        <div class="header-content">
+            <img src="/placeholder.svg?height=60&width=200" alt="Gana Cash Logo" width="200" height="60" class="logo">
+        </div>
+    </header>
+
+    <main>
+        <div class="game-container">
+            <h1>Gana Cash</h1>
+            <div id="gameContent"></div>
+        </div>
+
+        <div class="ad-banner">
+            <div class="ad-container">
+                <img src="/placeholder.svg?height=100&width=300" alt="Anuncio 1" class="ad-image">
+                <img src="/placeholder.svg?height=100&width=300" alt="Anuncio 2" class="ad-image">
+                <img src="/placeholder.svg?height=100&width=300" alt="Anuncio 3" class="ad-image">
+                <img src="/placeholder.svg?height=100&width=300" alt="Anuncio 1" class="ad-image">
+                <img src="/placeholder.svg?height=100&width=300" alt="Anuncio 2" class="ad-image">
+                <img src="/placeholder.svg?height=100&width=300" alt="Anuncio 3" class="ad-image">
             </div>
         </div>
-        <button id="spin-button">Girar</button>
-        <div id="result"></div>
-        <div id="payment-form" style="display: none;">
-            <h2>Completa tu pago</h2>
-            <form id="payment-form">
-                <div id="card-element"></div>
-                <button id="submit">Pagar</button>
-                <div id="payment-result"></div>
-            </form>
+
+        <div class="brand-logos">
+            <h2>Nuestros Patrocinadores</h2>
+            <div class="logo-container">
+                <img src="/placeholder.svg?height=50&width=100" alt="Marca 1" width="100" height="50">
+                <img src="/placeholder.svg?height=50&width=100" alt="Marca 2" width="100" height="50">
+                <img src="/placeholder.svg?height=50&width=100" alt="Marca 3" width="100" height="50">
+                <img src="/placeholder.svg?height=50&width=100" alt="Marca 4" width="100" height="50">
+            </div>
         </div>
-    </div>
+    </main>
+
+    <footer>
+        <p>Powered by Duality Domain</p>
+        <p>&copy; <span id="currentYear"></span> Gana Cash. Todos los derechos reservados.</p>
+    </footer>
+
+    <a href="https://wa.me/1234567890" target="_blank" rel="noopener noreferrer" class="whatsapp-button" aria-label="Contactar por WhatsApp">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+        </svg>
+    </a>
+
     <script src="script.js"></script>
 </body>
 </html>
