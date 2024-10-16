@@ -2,7 +2,7 @@ const WHEEL_SECTORS = [
     { label: '$10', type: 'cash', color: '#FF6B6B', weight: 1 },
     { label: 'Sigue participando', type: 'no-cash', color: '#4ECDC4', weight: 30 },
     { label: '$50', type: 'cash', color: '#45B7D1', weight: 8 },
-    { label: 'Sigue participando', type: 'no-cash', color: '#F7DC6F', weight: 40 },
+    { label: 'Sigue participando', type: 'no-cash', color: '#F7DC6F', weight:  40 },
     { label: '$100', type: 'cash', color: '#B8E986', weight: 4 },
     { label: 'Sigue participando', type: 'no-cash', color: '#FF8C42', weight: 50 },
     { label: '$500', type: 'cash', color: '#98DDCA', weight: 1 },
@@ -11,11 +11,9 @@ const WHEEL_SECTORS = [
 
 let gameState = 'START';
 let participationType = 'VIEWS';
-let rotation = 0;
 let winner = null;
 let cashWon = null;
 
-// Simulación de backend
 const backendSimulation = {
     users: [],
     payments: [],
@@ -48,7 +46,7 @@ function renderGameContent() {
     gameContent.className = 'fade-in';
 
     switch (gameState) {
-        case  'START':
+        case 'START':
             gameContent.innerHTML = `
                 <h2 class="slide-in">Elige cómo participar:</h2>
                 <div class="participation-options slide-in">
@@ -93,6 +91,7 @@ function renderGameContent() {
                     <canvas id="wheelCanvas" width="300" height="300"></canvas>
                     <div class="wheel-pointer"></div>
                 </div>
+                <p class="slide-in">Girando...</p>
             `;
             drawWheel();
             spinWheel();
@@ -146,10 +145,10 @@ function handlePayment() {
             gameState = 'SPINNING';
             spinWheel();
         } else {
-            alert('Error en el pago. Por favor, intenta de nuevo.');
+            showMessage('Error en el pago. Por favor, intenta de nuevo.', 'error');
         }
     } else {
-        alert('Por favor, registra tus datos antes de realizar un pago.');
+        showMessage('Por favor, registra tus datos antes de realizar un pago.', 'error');
         gameState = 'PAYMENT';
         renderGameContent();
     }
@@ -227,8 +226,7 @@ function easeOutCubic(t) {
 }
 
 function finishSpin(totalRotation) {
-    rotation = totalRotation % 360;
-    const normalizedRotation = (360 - rotation) % 360;
+    const normalizedRotation = (360 - totalRotation % 360) % 360;
     let accumulatedWeight = 0;
     const totalWeight = WHEEL_SECTORS.reduce((sum, sector) => sum + sector.weight, 0);
 
@@ -283,10 +281,20 @@ function handleFormSubmit(e) {
     if (isValid) {
         const userId = backendSimulation.registerUser({ name, email, phone });
         localStorage.setItem('userId', userId);
-        alert('¡Formulario enviado! Recibirás tu pago pronto.');
+        showMessage('¡Formulario enviado! Recibirás tu pago pronto.', 'success');
         gameState = 'START';
         renderGameContent();
     }
+}
+
+function showMessage(message, type) {
+    const messageElement = document.createElement('div');
+    messageElement.textContent = message;
+    messageElement.className = `message ${type} slide-in`;
+    document.body.appendChild(messageElement);
+    setTimeout(() => {
+        messageElement.remove();
+    }, 3000);
 }
 
 function setupAdSlider() {
@@ -311,9 +319,9 @@ function setupLogoSlider() {
     }, 3000);
 }
 
-document.getElementById('currentYear').textContent = new Date().getFullYear();
-
-// Inicializar la aplicación
-renderGameContent();
-setupAdSlider();
-setupLogoSlider();
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('currentYear').textContent = new Date().getFullYear();
+    renderGameContent();
+    setupAdSlider();
+    setupLogoSlider();
+});
