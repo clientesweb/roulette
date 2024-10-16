@@ -16,6 +16,7 @@ let cashWon = null;
 let wheelCanvas, wheelCtx;
 let userProfile = null;
 let stripe;
+let freeSpinUsed = false;
 
 const backendSimulation = {
     users: [],
@@ -78,21 +79,19 @@ function renderGameContent() {
     switch (gameState) {
         case 'START':
             gameContent.innerHTML = `
-                <h2 class="slide-in">Elige cómo participar:</h2>
-                <div class="participation-options slide-in">
-                    <button id="viewsButton" class="button">Por visualizaciones</button>
-                    <button id="directPaymentButton" class="button">Por pago directo</button>
-                </div>
+                <h2 class="slide-in">¡Gira la rueda y gana!</h2>
+                <button id="spinButton" class="button slide-in">Girar gratis</button>
             `;
-            document.getElementById('viewsButton').addEventListener('click', () => {
-                participationType = 'VIEWS';
-                gameState = 'WHEEL';
-                renderGameContent();
-            });
-            document.getElementById('directPaymentButton').addEventListener('click', () => {
-                participationType = 'DIRECT_PAYMENT';
-                gameState = 'PAYMENT';
-                renderGameContent();
+            document.getElementById('spinButton').addEventListener('click', () => {
+                if (freeSpinUsed) {
+                    showMessage('Ya has usado tu giro gratis. Debes pagar para jugar de nuevo.', 'error');
+                    gameState = 'PAYMENT';
+                    renderGameContent();
+                } else {
+                    freeSpinUsed = true;
+                    gameState = 'WHEEL';
+                    renderGameContent();
+                }
             });
             break;
         case 'WHEEL':
@@ -122,29 +121,54 @@ function renderGameContent() {
             break;
         case 'RESULT':
             const result = WHEEL_SECTORS[winner];
-            gameContent.innerHTML = `
-                <h2 class="slide-in">${result.type === 'cash' ? `¡Felicidades! Ganaste ${result.label}` : '¡Sigue participando!'}</h2>
-                <button id="playAgainButton" class="button slide-in">Volver a jugar</button>
-                <button id="payToPlayButton" class="button slide-in">Jugar por $1.29</button>
-            `;
-            document.getElementById('playAgainButton').addEventListener('click', () => {
-                gameState = 'START';
-                renderGameContent();
-            });
-            document.getElementById('payToPlayButton').addEventListener('click', () => {
-                participationType = 'DIRECT_PAYMENT';
-                gameState = 'PAYMENT';
-                renderGameContent();
-            });
+            if (result.type === 'cash') {
+                gameContent.innerHTML = `
+                    <h2 class="slide-in">¡Felicidades! Ganaste ${result.label}</h2>
+                    <form id="winnerForm" class="slide-in">
+                        <div class="form-group">
+                            <label for="name">Nombre completo</label>
+                            <input type="text" id="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="paymentMethod">Método de pago preferido</label>
+                            <select id="paymentMethod" required>
+                                <option value="">Selecciona un método</option>
+                                <option value="bank">Transferencia bancaria</option>
+                                <option value="paypal">PayPal</option>
+                                <option value="crypto">Criptomoneda</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="whatsapp">WhatsApp</label>
+                            <input type="tel" id="whatsapp" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Correo electrónico</label>
+                            <input type="email" id="email" required>
+                        </div>
+                        <button type="submit" class="button">Enviar</button>
+                    </form>
+                `;
+                document.getElementById('winnerForm').addEventListener('submit', handleWinnerForm);
+            } else {
+                gameContent.innerHTML = `
+                    <h2 class="slide-in">¡Sigue participando!</h2>
+                    <button id="playAgainButton" class="button slide-in">Volver a jugar</button>
+                `;
+                document.getElementById('playAgainButton').addEventListener('click', () => {
+                    gameState = 'PAYMENT';
+                    renderGameContent();
+                });
+            }
             break;
         case 'PAYMENT':
             gameContent.innerHTML = `
-                <h2 class="slide-in">${cashWon ? `¡Felicidades! Ganaste ${cashWon}` : 'Pago para jugar'}</h2>
-                <p class="slide-in">${cashWon ? 'Completa el formulario para recibir tu pago:' : 'Completa el formulario para realizar el pago de $1.29:'}</p>
+                <h2 class="slide-in">Pago para jugar</h2>
+                <p class="slide-in">Realiza el pago de $1.29 para girar la rueda:</p>
                 <form id="paymentForm" class="slide-in">
                     <div id="card-element"></div>
                     <div id="card-errors" role="alert"></div>
-                    <button type="submit" class="button">Pagar</button>
+                    <button type="submit" class="button">Pagar y Jugar</button>
                 </form>
             `;
             setupStripeElements();
@@ -204,9 +228,6 @@ function finishSpin(totalRotation) {
     const result = WHEEL_SECTORS[winner];
     if (result.type === 'cash') {
         cashWon = result.label;
-        gameState = 'PAYMENT';
-    } else {
-        gameState = 'RESULT';
     }
     
     if (userProfile) {
@@ -214,6 +235,7 @@ function finishSpin(totalRotation) {
         backendSimulation.updateUserLevel(userProfile.id);
     }
     
+    gameState = 'RESULT';
     renderGameContent();
 }
 
@@ -255,6 +277,29 @@ async function handlePaymentSubmit(e) {
             showMessage('Error en el pago. Por favor, intenta de nuevo.', 'error');
         }
     }
+}
+
+function handleWinnerForm(e) {
+    e.preventDefault();
+    const name = document.getElementById('name').value;
+    const paymentMethod = document.getElementById('paymentMethod').value;
+    const whatsapp = document.getElementById('whatsapp').value;
+    const email = document.getElementById('email').value;
+
+    const message = `Nuevo ganador:
+Nombre: ${name}
+Premio: ${cashWon}
+Método de pago: ${paymentMethod}
+WhatsApp: ${whatsapp}
+Email: ${email}`;
+
+    // Aquí deberías enviar el mensaje a tu número de WhatsApp
+    // Por ahora, solo mostraremos un mensaje de éxito
+    showMessage('¡Formulario enviado! Te contactaremos pronto para entregarte tu premio.', 'success');
+
+    // Reiniciar el juego
+    gameState = 'START';
+    renderGameContent();
 }
 
 function showMessage(message, type) {
