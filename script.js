@@ -2,9 +2,9 @@ const WHEEL_SECTORS = [
     { label: '$10', type: 'cash', color: '#FF6B6B', weight: 1 },
     { label: 'Sigue participando', type: 'no-cash', color: '#4ECDC4', weight: 30 },
     { label: '$50', type: 'cash', color: '#45B7D1', weight: 8 },
-    { label: 'Sigue participando', type: 'no-cash', color: '#F7DC6F', weight:  40 },
+    { label: 'Sigue participando', type: 'no-cash', color: '#F7DC6F', weight: 40 },
     { label: '$100', type: 'cash', color: '#B8E986', weight: 4 },
-    { label: 'Sigue participando', type: 'no-cash', color: '#FF8C42', weight: 50 },
+    { label: 'Sigue participando', type:  'no-cash', color: '#FF8C42', weight: 50 },
     { label: '$500', type: 'cash', color: '#98DDCA', weight: 1 },
     { label: 'Sigue participando', type: 'no-cash', color: '#D198C5', weight: 70 },
 ];
@@ -13,6 +13,7 @@ let gameState = 'START';
 let participationType = 'VIEWS';
 let winner = null;
 let cashWon = null;
+let wheelCanvas, wheelCtx;
 
 const backendSimulation = {
     users: [],
@@ -61,7 +62,7 @@ function renderGameContent() {
             });
             document.getElementById('directPaymentButton').addEventListener('click', () => {
                 participationType = 'DIRECT_PAYMENT';
-                gameState = 'WHEEL';
+                gameState = 'PAYMENT';
                 renderGameContent();
             });
             break;
@@ -71,19 +72,12 @@ function renderGameContent() {
                     <canvas id="wheelCanvas" width="300" height="300"></canvas>
                     <div class="wheel-pointer"></div>
                 </div>
-                <button id="spinButton" class="button slide-in">
-                    ${participationType === 'VIEWS' ? 'Girar' : 'Girar por $1.29'}
-                </button>
+                <button id="spinButton" class="button slide-in">Girar</button>
             `;
+            wheelCanvas = document.getElementById('wheelCanvas');
+            wheelCtx = wheelCanvas.getContext('2d');
             drawWheel();
-            document.getElementById('spinButton').addEventListener('click', () => {
-                if (participationType === 'DIRECT_PAYMENT') {
-                    handlePayment();
-                } else {
-                    gameState = 'SPINNING';
-                    spinWheel();
-                }
-            });
+            document.getElementById('spinButton').addEventListener('click', spinWheel);
             break;
         case 'SPINNING':
             gameContent.innerHTML = `
@@ -93,8 +87,9 @@ function renderGameContent() {
                 </div>
                 <p class="slide-in">Girando...</p>
             `;
+            wheelCanvas = document.getElementById('wheelCanvas');
+            wheelCtx = wheelCanvas.getContext('2d');
             drawWheel();
-            spinWheel();
             break;
         case 'RESULT':
             const result = WHEEL_SECTORS[winner];
@@ -107,12 +102,16 @@ function renderGameContent() {
                 gameState = 'START';
                 renderGameContent();
             });
-            document.getElementById('payToPlayButton').addEventListener('click', handlePayment);
+            document.getElementById('payToPlayButton').addEventListener('click', () => {
+                participationType = 'DIRECT_PAYMENT';
+                gameState = 'PAYMENT';
+                renderGameContent();
+            });
             break;
         case 'PAYMENT':
             gameContent.innerHTML = `
-                <h2 class="slide-in">¡Felicidades! Ganaste ${cashWon}</h2>
-                <p class="slide-in">Completa el formulario para recibir tu pago:</p>
+                <h2 class="slide-in">${cashWon ? `¡Felicidades! Ganaste ${cashWon}` : 'Pago para jugar'}</h2>
+                <p class="slide-in">${cashWon ? 'Completa el formulario para recibir tu pago:' : 'Completa el formulario para realizar el pago de $1.29:'}</p>
                 <form id="paymentForm" class="slide-in">
                     <div class="form-group">
                         <label for="name">Nombre completo</label>
@@ -137,31 +136,16 @@ function renderGameContent() {
     }
 }
 
-function handlePayment() {
-    const userId = localStorage.getItem('userId');
-    if (userId) {
-        const paymentResult = backendSimulation.processPayment(userId, 1.29);
-        if (paymentResult.success) {
-            gameState = 'SPINNING';
-            spinWheel();
-        } else {
-            showMessage('Error en el pago. Por favor, intenta de nuevo.', 'error');
-        }
-    } else {
-        showMessage('Por favor, registra tus datos antes de realizar un pago.', 'error');
-        gameState = 'PAYMENT';
-        renderGameContent();
-    }
-}
+function drawWheel(rotation = 0) {
+    const centerX = wheelCanvas.width / 2;
+    const centerY = wheelCanvas.height / 2;
+    const radius = wheelCanvas.width / 2 - 10;
 
-function drawWheel() {
-    const canvas = document.getElementById('wheelCanvas');
-    const ctx = canvas.getContext('2d');
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-    const radius = canvas.width / 2 - 10;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    wheelCtx.clearRect(0, 0, wheelCanvas.width, wheelCanvas.height);
+    wheelCtx.save();
+    wheelCtx.translate(centerX, centerY);
+    wheelCtx.rotate(rotation);
+    wheelCtx.translate(-centerX, -centerY);
 
     let totalWeight = WHEEL_SECTORS.reduce((sum, sector) => sum + sector.weight, 0);
     let currentAngle = 0;
@@ -170,29 +154,31 @@ function drawWheel() {
         const sector = WHEEL_SECTORS[i];
         const angle = (sector.weight / totalWeight) * Math.PI * 2;
 
-        ctx.beginPath();
-        ctx.moveTo(centerX, centerY);
-        ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + angle);
-        ctx.lineTo(centerX, centerY);
-        ctx.fillStyle = sector.color;
-        ctx.fill();
+        wheelCtx.beginPath();
+        wheelCtx.moveTo(centerX, centerY);
+        wheelCtx.arc(centerX, centerY, radius, currentAngle, currentAngle + angle);
+        wheelCtx.lineTo(centerX, centerY);
+        wheelCtx.fillStyle = sector.color;
+        wheelCtx.fill();
 
-        ctx.save();
-        ctx.translate(centerX, centerY);
-        ctx.rotate(currentAngle + angle / 2);
-        ctx.textAlign = 'right';
-        ctx.fillStyle = '#fff';
-        ctx.font = 'bold 16px Arial';
-        ctx.fillText(sector.label, radius - 10, 5);
-        ctx.restore();
+        wheelCtx.save();
+        wheelCtx.translate(centerX, centerY);
+        wheelCtx.rotate(currentAngle + angle / 2);
+        wheelCtx.textAlign = 'right';
+        wheelCtx.fillStyle = '#fff';
+        wheelCtx.font = 'bold 16px Arial';
+        wheelCtx.fillText(sector.label, radius - 10, 5);
+        wheelCtx.restore();
 
         currentAngle += angle;
     }
+
+    wheelCtx.restore();
 }
 
 function spinWheel() {
-    const canvas = document.getElementById('wheelCanvas');
-    const ctx = canvas.getContext('2d');
+    gameState = 'SPINNING';
+    renderGameContent();
     
     let currentRotation = 0;
     const totalRotation = 1440 + Math.random() * 360;
@@ -204,12 +190,7 @@ function spinWheel() {
         const progress = Math.min(elapsedTime / duration, 1);
         currentRotation = easeOutCubic(progress) * totalRotation;
 
-        ctx.save();
-        ctx.translate(canvas.width / 2, canvas.height / 2);
-        ctx.rotate(currentRotation * Math.PI / 180);
-        ctx.translate(-canvas.width / 2, -canvas.height / 2);
-        drawWheel();
-        ctx.restore();
+        drawWheel(currentRotation * Math.PI / 180);
 
         if (progress < 1) {
             requestAnimationFrame(animate);
@@ -281,9 +262,21 @@ function handleFormSubmit(e) {
     if (isValid) {
         const userId = backendSimulation.registerUser({ name, email, phone });
         localStorage.setItem('userId', userId);
-        showMessage('¡Formulario enviado! Recibirás tu pago pronto.', 'success');
-        gameState = 'START';
-        renderGameContent();
+
+        if (participationType === 'DIRECT_PAYMENT') {
+            const paymentResult = backendSimulation.processPayment(userId, 1.29);
+            if (paymentResult.success) {
+                showMessage('Pago procesado correctamente. ¡A jugar!', 'success');
+                gameState = 'WHEEL';
+                renderGameContent();
+            } else {
+                showMessage('Error en el pago. Por favor, intenta de nuevo.', 'error');
+            }
+        } else {
+            showMessage('¡Formulario enviado! Recibirás tu pago pronto.', 'success');
+            gameState = 'START';
+            renderGameContent();
+        }
     }
 }
 
