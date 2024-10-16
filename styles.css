@@ -89,9 +89,10 @@ h2 {
 
 .wheel-container {
     position: relative;
-    width: 16rem;
-    height: 16rem;
+    width: 100%;
+    max-width: 300px;
     margin: 0 auto;
+    aspect-ratio: 1 / 1;
 }
 
 .wheel {
@@ -147,16 +148,7 @@ h2 {
 
 .ad-container {
     display: flex;
-    animation: scroll 30s linear infinite;
-}
-
-@keyframes scroll {
-    0% {
-        transform: translateX(0);
-    }
-    100% {
-        transform: translateX(-100%);
-    }
+    transition: transform 0.5s ease;
 }
 
 .ad-image {
@@ -177,20 +169,22 @@ h2 {
     padding: 2rem;
     border-radius: 0.5rem;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
 }
 
-.logo-container {
+.logo-slider {
     display: flex;
-    justify-content: center;
-    gap: 1rem;
-    flex-wrap: wrap;
+    transition: transform 0.5s ease;
 }
 
-.logo-container img {
+.logo-slider img {
+    width: 100px;
+    height: 50px;
+    margin-right: 1rem;
     transition: transform 0.3s ease;
 }
 
-.logo-container img:hover {
+.logo-slider img:hover {
     transform: scale(1.1);
 }
 
@@ -224,6 +218,28 @@ footer {
     transform: scale(1.1);
 }
 
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 0.25rem;
+}
+
+.error-message {
+    color: #dc2626;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
 @media (max-width: 768px) {
     main {
         padding: 1rem;
@@ -238,23 +254,15 @@ footer {
     }
 
     .wheel-container {
-        width: 14rem;
-        height: 14rem;
+        max-width: 250px;
     }
 
-    .ad-banner {
-        display: none;
+    .ad-image {
+        width: 200px;
+        height: auto;
     }
 
-    .brand-logos {
-        padding: 1rem;
-    }
-
-    .logo-container {
-        gap: 0.5rem;
-    }
-
-    .logo-container img {
+    .logo-slider img {
         width: 80px;
         height: auto;
     }
@@ -270,17 +278,23 @@ footer {
     }
 
     .wheel-container {
-        width: 12rem;
-        height: 12rem;
+        max-width: 200px;
     }
 
     .button {
         padding: 0.5rem 1rem;
         font-size: 0.9rem;
     }
+
+    .ad-image {
+        width: 150px;
+    }
+
+    .logo-slider img {
+        width: 60px;
+    }
 }
 
-/* Animaciones */
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
